@@ -1,0 +1,69 @@
+# =========================
+# 🔒 Maxfiy fayllar
+# =========================
+.env
+*.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# =========================
+# 🧩 Virtual environment
+# =========================
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+.eggs/
+
+# =========================
+# 💾 IDE fayllari
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# 📦 Kesh va log fayllar
+# =========================
+*.log
+logs/
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# =========================
+# 📁 Fayl yuklash vaqtida ishlatiladigan vaqtinchalik fayllar
+# =========================
+uploads/
+downloads/
+temp/
+tmp/
+
+# =========================
+# 🧠 AI API va token fayllar
+# =========================
+openai_api_key.txt
+secret_key.txt
+token.txt
+
+# =========================
+# 🔧 Build va dependency fayllar
+# =========================
+dist/
+build/
+*.egg
+*.manifest
+*.spec
+
+# =========================
+# ⚙️ OS va boshqa keraksiz fayllar
+# =========================
+*.~lock.*
+desktop.ini
