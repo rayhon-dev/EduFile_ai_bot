@@ -25,8 +25,13 @@ def translate_text_preserving_math(content: str) -> str:
     # So‘rov yuborish
     response = model.generate_content(prompt)
 
-    # Javobni olish
-    translated = response.text.strip() if response.text else masked
+    # To‘g‘ri matnni olish
+    if response.candidates:
+        translated = response.candidates[0].content.strip()
+    else:
+        translated = ""
 
-    # Matematik qismlarni tiklash
-    return unmask_math_expressions(translated, placeholders)
+    # Matematik ifodalarni tiklash
+    translated = unmask_math_expressions(translated, placeholders)
+
+    return translated
