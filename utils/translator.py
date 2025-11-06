@@ -1,0 +1,32 @@
+import google.generativeai as genai
+import os
+from utils.math_detector import mask_math_expressions, unmask_math_expressions
+
+# API kalitni sozlash
+genai.configure(api_key=os.getenv("GEMINI_API_KEY") or "YOUR_API_KEY_HERE")
+
+def translate_text_preserving_math(content: str) -> str:
+    # Free versiyada ishlaydigan model
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    # Matematik qismlarni vaqtincha masklash
+    masked, placeholders = mask_math_expressions(content)
+
+    # Tarjima uchun prompt
+    prompt = f"""
+    Translate the following text to English.
+    Do NOT translate or modify any placeholders like [MATH_EXPR_0].
+    Just translate the sentences around them.
+
+    Input:
+    {masked}
+    """
+
+    # So‘rov yuborish
+    response = model.generate_content(prompt)
+
+    # Javobni olish
+    translated = response.text.strip() if response.text else masked
+
+    # Matematik qismlarni tiklash
+    return unmask_math_expressions(translated, placeholders)
