@@ -7,7 +7,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY") or "YOUR_API_KEY_HERE")
 
 def translate_text_preserving_math(content: str) -> str:
     # Free versiyada ishlaydigan model
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("models/gemini-2.5-flash")
 
     # Matematik qismlarni vaqtincha masklash
     masked, placeholders = mask_math_expressions(content)
