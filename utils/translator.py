@@ -27,7 +27,7 @@ def translate_text_preserving_math(content: str) -> str:
 
     # To‘g‘ri matnni olish
     if response.candidates:
-        translated = response.candidates[0].content.strip()
+        translated = response.candidates[0].content.parts[0].text.strip()
     else:
         translated = ""
 
