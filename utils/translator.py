@@ -1,37 +1,58 @@
-import google.generativeai as genai
 import os
-from utils.math_detector import mask_math_expressions, unmask_math_expressions
+import google.generativeai as genai
+from utils.math_detector import safe_translate_math
 
-# API kalitni sozlash
-genai.configure(api_key=os.getenv("GEMINI_API_KEY") or "YOUR_API_KEY_HERE")
 
-def translate_text_preserving_math(content: str) -> str:
-    # Free versiyada ishlaydigan model
-    model = genai.GenerativeModel("models/gemini-2.5-flash")
+def configure_genai():
+    from dotenv import load_dotenv
+    load_dotenv()  # Bu yerda ham chaqirish mumkin
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY muhit o'zgaruvchisi topilmadi!")
+    genai.configure(api_key=api_key)
 
-    # Matematik qismlarni vaqtincha masklash
-    masked, placeholders = mask_math_expressions(content)
+configure_genai()
 
-    # Tarjima uchun prompt
-    prompt = f"""
-    Translate the following text to English.
-    Do NOT translate or modify any placeholders like [MATH_EXPR_0].
-    Just translate the sentences around them.
 
-    Input:
-    {masked}
+def translate_text_preserving_math(content: str, source_lang="uz", target_lang="en") -> str:
+    """
+    Matematika, formulalar va matritsalarni o‘zgartirmasdan tarjima qiladi.
+    Default: Uzbek → English
     """
 
-    # So‘rov yuborish
-    response = model.generate_content(prompt)
+    model = genai.GenerativeModel("models/gemini-2.5-flash")
 
-    # To‘g‘ri matnni olish
-    if response.candidates:
-        translated = response.candidates[0].content.parts[0].text.strip()
-    else:
-        translated = ""
+    def gemini_translate(text):
+        prompt = f"""
+You are a professional translator.
 
-    # Matematik ifodalarni tiklash
-    translated = unmask_math_expressions(translated, placeholders)
+Translate this text from {source_lang.upper()} to {target_lang.upper()}.
 
-    return translated
+IMPORTANT:
+- Do NOT translate or modify anything inside placeholders like [MATH_EXPR_0], <FORMULA_0>, etc.
+- Preserve all mathematical expressions, symbols, and formatting exactly.
+- Only translate the regular text outside placeholders.
+
+Text to translate:
+{text}
+"""
+        try:
+            response = model.generate_content(prompt)
+            if not response or not response.candidates:
+                return text
+
+            candidate = response.candidates[0]
+            if not candidate.content or not candidate.content.parts:
+                return text
+
+            translated = "".join(
+                getattr(part, "text", "") for part in candidate.content.parts
+            ).strip()
+
+            return translated or text
+
+        except Exception as e:
+            print(f"[Translation Error] {e}")
+            return text
+
+    return safe_translate_math(content, gemini_translate)
